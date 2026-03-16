@@ -1,4 +1,4 @@
-import { bankrollTotal, euro, loadSessions, saveSessions } from './store.js';
+import { bankrollTotal, euro, loadSessions, saveSessions, toNumber } from './store.js';
 import { sessionForm } from './components/sessionForm.js';
 import { sessionTable } from './components/sessionTable.js';
 import { sortByDateDesc, uid } from './utils/helpers.js';
@@ -6,8 +6,7 @@ import { sortByDateDesc, uid } from './utils/helpers.js';
 const state = {
   sessions: sortByDateDesc(loadSessions()),
   draft: { gameType: 'cash', variant: 'NLH', date: today() },
-  query: '',
-  filters: { gameType: 'all', location: '' }
+  filters: { gameType: 'all', detail: 'all' }
 };
 
 const app = document.querySelector('#app');
@@ -17,12 +16,13 @@ render();
 function render() {
   const bankroll = bankrollTotal(state.sessions);
   const filtered = filteredSessions();
+  const detailOptions = buildDetailOptions(state.sessions);
 
   app.innerHTML = `
     <main class="layout">
       <header class="top-bar">
         <div>
-          <h1>♣ Funky Poker Session Tracker ♠</h1>
+          <h1>Funky Poker Session Tracker</h1>
           <p>Local-first tracker built for rapid iteration and future Windows desktop packaging.</p>
         </div>
         <div class="bankroll ${bankroll >= 0 ? 'positive' : 'negative'}">
@@ -33,7 +33,7 @@ function render() {
 
       <section class="panel-grid">
         ${sessionForm({ draft: state.draft })}
-        ${sessionTable({ sessions: filtered, query: state.query, filters: state.filters })}
+        ${sessionTable({ sessions: filtered, filters: state.filters, detailOptions })}
       </section>
     </main>
   `;
@@ -43,30 +43,25 @@ function render() {
 
 function bindEvents() {
   const form = document.querySelector('#session-form');
-  const search = document.querySelector('#search');
   const filterType = document.querySelector('#filter-gameType');
-  const filterLocation = document.querySelector('#filter-location');
+  const filterDetail = document.querySelector('#filter-detail');
 
   form?.addEventListener('submit', onSubmit);
   form?.addEventListener('change', onFormChange);
-  search?.addEventListener('input', (event) => {
-    state.query = event.target.value;
-    render();
-  });
 
   filterType?.addEventListener('change', (event) => {
     state.filters.gameType = event.target.value;
     render();
   });
 
-  filterLocation?.addEventListener('input', (event) => {
-    state.filters.location = event.target.value;
+  filterDetail?.addEventListener('change', (event) => {
+    state.filters.detail = event.target.value;
     render();
   });
 
   document.querySelectorAll('[data-action="edit"]').forEach((button) => {
     button.addEventListener('click', () => {
-      const target = state.sessions.find((s) => s.id === button.dataset.id);
+      const target = state.sessions.find((session) => session.id === button.dataset.id);
       if (!target) return;
       state.draft = { ...target };
       render();
@@ -75,7 +70,7 @@ function bindEvents() {
 
   document.querySelectorAll('[data-action="delete"]').forEach((button) => {
     button.addEventListener('click', () => {
-      state.sessions = state.sessions.filter((s) => s.id !== button.dataset.id);
+      state.sessions = state.sessions.filter((session) => session.id !== button.dataset.id);
       saveAndRender();
     });
   });
@@ -83,10 +78,7 @@ function bindEvents() {
 
 function onFormChange(event) {
   const formData = readForm(event.currentTarget);
-  if (
-    state.draft.gameType !== formData.gameType ||
-    Boolean(state.draft.inMoney) !== Boolean(formData.inMoney)
-  ) {
+  if (state.draft.gameType !== formData.gameType) {
     state.draft = { ...state.draft, ...formData };
     render();
   }
@@ -97,7 +89,7 @@ function onSubmit(event) {
   const payload = readForm(event.currentTarget);
 
   if (payload.id) {
-    state.sessions = state.sessions.map((s) => (s.id === payload.id ? payload : s));
+    state.sessions = state.sessions.map((session) => (session.id === payload.id ? payload : session));
   } else {
     payload.id = uid();
     state.sessions.unshift(payload);
@@ -134,25 +126,82 @@ function readForm(form) {
     buyIn: fd.get('buyIn'),
     amountWon: fd.get('amountWon'),
     positionFinished: fd.get('positionFinished'),
-    inMoney: fd.get('inMoney') === 'on',
     entrants: fd.get('entrants')
   };
 }
 
 function filteredSessions() {
-  const q = state.query.trim().toLowerCase();
   return state.sessions.filter((session) => {
-    const text = [session.location, session.variant, session.tournamentName, session.date].join(' ').toLowerCase();
     const gameTypeMatch = state.filters.gameType === 'all' || session.gameType === state.filters.gameType;
-    const locationMatch = !state.filters.location || session.location.toLowerCase().includes(state.filters.location.toLowerCase());
-    const textMatch = !q || text.includes(q);
-    return gameTypeMatch && locationMatch && textMatch;
+    const detailMatch = matchesDetailFilter(session, state.filters.detail);
+    return gameTypeMatch && detailMatch;
   });
 }
 
 function saveAndRender() {
   saveSessions(state.sessions);
   render();
+}
+
+function buildDetailOptions(sessions) {
+  const options = [{ value: 'all', label: 'All details' }];
+  const locations = uniqueSorted(sessions.map((session) => session.location));
+  const gameTypes = uniqueSorted(sessions.map((session) => session.gameType));
+  const variants = uniqueSorted(sessions.map((session) => session.variant));
+  const tournamentNames = uniqueSorted(sessions.map((session) => session.tournamentName));
+  const buyIns = [...new Set(
+    sessions
+      .filter((session) => session.gameType !== 'cash' && session.buyIn !== '' && session.buyIn != null)
+      .map((session) => String(toNumber(session.buyIn)))
+  )].sort((left, right) => Number(left) - Number(right));
+
+  locations.forEach((location) => {
+    options.push({ value: `location::${location}`, label: `Location: ${location}` });
+  });
+
+  gameTypes.forEach((gameType) => {
+    options.push({ value: `gameType::${gameType}`, label: `Game type: ${formatGameType(gameType)}` });
+  });
+
+  variants.forEach((variant) => {
+    options.push({ value: `variant::${variant}`, label: `Variant: ${variant}` });
+  });
+
+  tournamentNames.forEach((tournamentName) => {
+    options.push({ value: `tournamentName::${tournamentName}`, label: `Tournament: ${tournamentName}` });
+  });
+
+  buyIns.forEach((buyIn) => {
+    options.push({ value: `buyIn::${buyIn}`, label: `Buy-in: ${euro(Number(buyIn))}` });
+  });
+
+  return options;
+}
+
+function uniqueSorted(values) {
+  return [...new Set(values.filter((value) => value != null && value !== ''))].sort((left, right) =>
+    String(left).localeCompare(String(right))
+  );
+}
+
+function matchesDetailFilter(session, filterValue) {
+  if (filterValue === 'all') return true;
+
+  const [kind, rawValue = ''] = filterValue.split('::');
+
+  if (kind === 'location') return session.location === rawValue;
+  if (kind === 'gameType') return session.gameType === rawValue;
+  if (kind === 'variant') return session.variant === rawValue;
+  if (kind === 'tournamentName') return session.tournamentName === rawValue;
+  if (kind === 'buyIn') return String(toNumber(session.buyIn)) === rawValue;
+
+  return true;
+}
+
+function formatGameType(gameType) {
+  if (gameType === 'sit-go') return 'Sit & Go';
+  if (gameType === 'tournament') return 'Tournament';
+  return 'Cash';
 }
 
 function today() {

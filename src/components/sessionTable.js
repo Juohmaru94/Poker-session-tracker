@@ -1,19 +1,26 @@
 import { euro, sessionProfit } from '../store.js';
 
-export function sessionTable({ sessions, query, filters }) {
+function optionMarkup(options, selectedValue) {
+  return options
+    .map((option) => `<option value="${option.value}" ${option.value === selectedValue ? 'selected' : ''}>${option.label}</option>`)
+    .join('');
+}
+
+export function sessionTable({ sessions, filters, detailOptions }) {
   return `
     <section class="card history-card">
       <div class="history-head">
         <h2>Session history</h2>
         <div class="filters">
-          <input id="search" type="search" placeholder="Search location, tournament, variant..." value="${query}" />
           <select id="filter-gameType">
             <option value="all" ${filters.gameType === 'all' ? 'selected' : ''}>All game types</option>
             <option value="cash" ${filters.gameType === 'cash' ? 'selected' : ''}>Cash</option>
             <option value="tournament" ${filters.gameType === 'tournament' ? 'selected' : ''}>Tournament</option>
             <option value="sit-go" ${filters.gameType === 'sit-go' ? 'selected' : ''}>Sit & Go</option>
           </select>
-          <input id="filter-location" type="text" placeholder="Filter location" value="${filters.location}" />
+          <select id="filter-detail">
+            ${optionMarkup(detailOptions, filters.detail)}
+          </select>
         </div>
       </div>
 
@@ -27,17 +34,17 @@ export function sessionTable({ sessions, query, filters }) {
           <tbody>
             ${sessions.length === 0 ? `
               <tr><td colspan="7" class="empty">No sessions match your filters yet.</td></tr>
-            ` : sessions.map((s) => `
+            ` : sessions.map((session) => `
               <tr>
-                <td>${s.date || '-'}</td>
-                <td>${s.location || '-'}</td>
-                <td>${labelType(s.gameType)}</td>
-                <td>${s.variant || '-'}</td>
-                <td>${detailText(s)}</td>
-                <td class="${sessionProfit(s) >= 0 ? 'pos' : 'neg'}">${euro(sessionProfit(s))}</td>
-                <td>
-                  <button class="btn-small" data-action="edit" data-id="${s.id}">Edit</button>
-                  <button class="btn-small danger" data-action="delete" data-id="${s.id}">Delete</button>
+                <td>${session.date || '-'}</td>
+                <td>${session.location || '-'}</td>
+                <td>${labelType(session.gameType)}</td>
+                <td>${session.variant || '-'}</td>
+                <td>${detailText(session)}</td>
+                <td class="${sessionProfit(session) >= 0 ? 'pos' : 'neg'}">${euro(sessionProfit(session))}</td>
+                <td class="actions-cell">
+                  <button class="btn-small" data-action="edit" data-id="${session.id}">Edit</button>
+                  <button class="btn-small danger" data-action="delete" data-id="${session.id}">Delete</button>
                 </td>
               </tr>
             `).join('')}
@@ -56,8 +63,9 @@ function labelType(type) {
 
 function detailText(session) {
   if (session.gameType === 'cash') {
-    return `In: ${euro(Number(session.moneyIn || 0))} · Out: ${euro(Number(session.moneyOut || 0))}`;
+    return `In: ${euro(Number(session.moneyIn || 0))} | Out: ${euro(Number(session.moneyOut || 0))}`;
   }
-  const itm = session.inMoney ? ` · ITM/${session.entrants || '?'} entrants` : '';
-  return `${session.tournamentName || 'Event'} · Buy-in ${euro(Number(session.buyIn || 0))} · Won ${euro(Number(session.amountWon || 0))} · Pos ${session.positionFinished || '-'}${itm}`;
+
+  const entrants = session.entrants ? ` | Entrants ${session.entrants}` : '';
+  return `${session.tournamentName || 'Event'} | Buy-in ${euro(Number(session.buyIn || 0))} | Won ${euro(Number(session.amountWon || 0))} | Pos ${session.positionFinished || '-'}${entrants}`;
 }

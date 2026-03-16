@@ -1,29 +1,36 @@
 :root {
-  --bg: #130b2e;
-  --surface: #23154a;
-  --surface-2: #2d1f5b;
-  --text: #f5f1ff;
-  --muted: #b6a6e4;
-  --accent: #ff5ec7;
-  --accent-2: #33ffc8;
-  --danger: #ff5775;
-  --success: #54e285;
-  --negative: #ff6178;
-  --border: #4f3c8b;
+  --bg: #170a22;
+  --surface: #281338;
+  --surface-2: #3a1951;
+  --surface-3: #4d205f;
+  --text: #fff2eb;
+  --muted: #e2c1d0;
+  --accent: #ff8a3d;
+  --accent-2: #ab59ff;
+  --accent-3: #ffb15a;
+  --danger: #ff6583;
+  --success: #72f0a1;
+  --negative: #ff7a8f;
+  --border: rgba(255, 158, 88, 0.42);
+  --shadow: rgba(14, 6, 24, 0.42);
 }
 
 * { box-sizing: border-box; }
 body {
   margin: 0;
+  min-height: 100vh;
   font-family: 'Inter', system-ui, sans-serif;
   color: var(--text);
-  background: radial-gradient(circle at 20% 10%, #331b65, var(--bg) 40%);
+  background:
+    radial-gradient(circle at top left, rgba(171, 89, 255, 0.34), transparent 34%),
+    radial-gradient(circle at top right, rgba(255, 138, 61, 0.30), transparent 28%),
+    linear-gradient(135deg, #14091f 0%, #231034 36%, #34124d 68%, #21102f 100%);
 }
 
 .layout {
-  max-width: 1240px;
-  margin: 0 auto;
-  padding: 20px;
+  width: 100%;
+  min-height: 100vh;
+  padding: 24px clamp(18px, 3vw, 40px) 32px;
 }
 
 h1, h2 {
@@ -37,7 +44,7 @@ h1, h2 {
   justify-content: space-between;
   align-items: flex-start;
   gap: 16px;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 
 .top-bar p {
@@ -47,11 +54,11 @@ h1, h2 {
 
 .bankroll {
   padding: 14px 18px;
-  border-radius: 14px;
-  min-width: 230px;
+  border-radius: 18px;
+  min-width: 250px;
   text-align: right;
-  border: 1px solid var(--border);
-  background: var(--surface);
+  border: 3px solid var(--border);
+  box-shadow: 0 18px 38px var(--shadow);
 }
 .bankroll span { color: var(--muted); font-size: 0.9rem; display: block; }
 .bankroll strong { font-size: 1.5rem; }
@@ -60,23 +67,28 @@ h1, h2 {
 
 .panel-grid {
   display: grid;
-  grid-template-columns: minmax(310px, 430px) 1fr;
-  gap: 16px;
+  grid-template-columns: minmax(320px, 450px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
 }
 
 .card {
-  background: linear-gradient(155deg, var(--surface), var(--surface-2));
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25);
+  background:
+    linear-gradient(160deg, rgba(255, 138, 61, 0.08), transparent 28%),
+    linear-gradient(155deg, var(--surface), var(--surface-2));
+  border: 2px solid var(--border);
+  border-radius: 20px;
+  box-shadow: 0 18px 40px var(--shadow);
+  backdrop-filter: blur(10px);
 }
 
-.session-form { padding: 18px; }
+.session-form { padding: 20px; }
 .card-title-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  gap: 12px;
+  margin-bottom: 14px;
 }
 
 .grid {
@@ -87,7 +99,7 @@ h1, h2 {
 
 label {
   font-size: 0.86rem;
-  color: #ded3fb;
+  color: #ffe2da;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -95,23 +107,24 @@ label {
 
 input, select {
   border: 1px solid var(--border);
-  background: #130d2f;
+  background: rgba(26, 12, 39, 0.92);
   color: var(--text);
-  border-radius: 10px;
-  padding: 10px;
+  border-radius: 12px;
+  padding: 11px 12px;
   font: inherit;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
 }
 
 input:focus, select:focus {
   outline: none;
-  border-color: var(--accent-2);
-  box-shadow: 0 0 0 3px rgba(51, 255, 200, 0.18);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(255, 138, 61, 0.18);
 }
 
 .dynamic-block {
   margin-top: 14px;
   padding-top: 12px;
-  border-top: 1px dashed var(--border);
+  border-top: 1px dashed rgba(255, 177, 90, 0.28);
   display: grid;
   gap: 10px;
 }
@@ -132,24 +145,50 @@ input:focus, select:focus {
 }
 
 .btn {
-  padding: 10px 14px;
-  color: #12061d;
-  background: linear-gradient(90deg, var(--accent), #ffa5df);
+  padding: 11px 15px;
+  color: #210d18;
+  background: linear-gradient(90deg, var(--accent), var(--accent-3));
+  box-shadow: 0 12px 24px rgba(255, 138, 61, 0.24);
+  transition: transform 0.18s ease, filter 0.18s ease, box-shadow 0.18s ease;
 }
 
 .btn-small {
-  padding: 7px 10px;
-  background: #413078;
+  width: 96px;
+  padding: 9px 12px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  background: #5b3288;
   color: var(--text);
   margin-right: 6px;
+  transition: transform 0.18s ease, filter 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
 }
 
 .btn-small.danger {
-  background: #6e2445;
+  background: #8d333a;
+}
+
+.btn:hover,
+.btn-small:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.btn:hover {
+  box-shadow: 0 16px 28px rgba(255, 138, 61, 0.28);
+}
+
+.btn-small:hover {
+  background: #7442aa;
+  box-shadow: 0 10px 22px rgba(31, 13, 45, 0.28);
+}
+
+.btn-small.danger:hover {
+  background: #9e4040;
 }
 
 .history-card {
-  padding: 14px;
+  padding: 16px;
   overflow: hidden;
 }
 
@@ -168,10 +207,15 @@ input:focus, select:focus {
   justify-content: flex-end;
 }
 
+.filters select {
+  min-width: 190px;
+}
+
 .table-wrap {
   overflow: auto;
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 16px;
+  background: rgba(21, 10, 31, 0.68);
 }
 
 table {
@@ -182,13 +226,13 @@ table {
 
 th, td {
   padding: 10px;
-  border-bottom: 1px solid #44306f;
+  border-bottom: 1px solid rgba(255, 177, 90, 0.14);
   text-align: left;
   font-size: 0.9rem;
 }
 
 th {
-  background: #171033;
+  background: rgba(31, 12, 43, 0.98);
   position: sticky;
   top: 0;
 }
@@ -196,11 +240,13 @@ th {
 .pos { color: var(--success); font-weight: 700; }
 .neg { color: var(--negative); font-weight: 700; }
 .empty { text-align: center; color: var(--muted); }
+.actions-cell { white-space: nowrap; }
 
 @media (max-width: 1050px) {
   .panel-grid { grid-template-columns: 1fr; }
   .history-head { flex-direction: column; align-items: stretch; }
   .filters { justify-content: stretch; }
+  .filters select { min-width: 0; width: 100%; }
   .top-bar { flex-direction: column; }
   .bankroll { text-align: left; }
 }

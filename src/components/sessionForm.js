@@ -2,21 +2,23 @@ import { gameTypes, variants } from '../utils/helpers.js';
 
 function optionMarkup(options, selectedValue) {
   return options
-    .map((opt) => {
-      if (typeof opt === 'string') {
-        return `<option value="${opt}" ${opt === selectedValue ? 'selected' : ''}>${opt}</option>`;
+    .map((option) => {
+      if (typeof option === 'string') {
+        return `<option value="${option}" ${option === selectedValue ? 'selected' : ''}>${option}</option>`;
       }
-      return `<option value="${opt.value}" ${opt.value === selectedValue ? 'selected' : ''}>${opt.label}</option>`;
+
+      return `<option value="${option.value}" ${option.value === selectedValue ? 'selected' : ''}>${option.label}</option>`;
     })
     .join('');
 }
 
-function showTourFields(gameType) {
+function showTournamentFields(gameType) {
   return gameType === 'tournament' || gameType === 'sit-go';
 }
 
 export function sessionForm({ draft }) {
-  const tournamentMode = showTourFields(draft.gameType);
+  const tournamentMode = showTournamentFields(draft.gameType);
+
   return `
     <form id="session-form" class="card session-form">
       <div class="card-title-row">
@@ -58,32 +60,25 @@ export function sessionForm({ draft }) {
 
       ${tournamentMode ? `
         <div class="dynamic-block">
-          <label>Stakes / Buy-in (€)
+          <label>Stakes / Buy-in (EUR)
             <input type="number" min="0" step="0.01" name="buyIn" required value="${draft.buyIn ?? ''}" />
           </label>
-          <label>Amount won (€)
+          <label>Amount won (EUR)
             <input type="number" min="0" step="0.01" name="amountWon" required value="${draft.amountWon ?? ''}" />
           </label>
           <label>Position finished
             <input type="number" min="1" step="1" name="positionFinished" required value="${draft.positionFinished ?? ''}" />
           </label>
-          <label class="inline-check">
-            <input type="checkbox" name="inMoney" ${draft.inMoney ? 'checked' : ''} />
-            Finished in the money
+          <label>Number of entrants (optional)
+            <input type="number" min="2" step="1" name="entrants" value="${draft.entrants ?? ''}" />
           </label>
-
-          ${draft.inMoney ? `
-            <label>Number of entrants
-              <input type="number" min="2" step="1" name="entrants" required value="${draft.entrants ?? ''}" />
-            </label>
-          ` : ''}
         </div>
       ` : `
         <div class="dynamic-block">
-          <label>Money in (€)
+          <label>Money in (EUR)
             <input type="number" min="0" step="0.01" name="moneyIn" required value="${draft.moneyIn ?? ''}" />
           </label>
-          <label>Money out (€)
+          <label>Money out (EUR)
             <input type="number" min="0" step="0.01" name="moneyOut" required value="${draft.moneyOut ?? ''}" />
           </label>
         </div>
