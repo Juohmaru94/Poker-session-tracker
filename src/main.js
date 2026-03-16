@@ -22,8 +22,8 @@ function render() {
     <main class="layout">
       <header class="top-bar">
         <div>
-          <h1>Funky Poker Session Tracker</h1>
-          <p>Local-first tracker built for rapid iteration and future Windows desktop packaging.</p>
+          <h1>Poker Session Tracker</h1>
+          <p>Track your poker sessions and analyze your performance over time.</p>
         </div>
         <div class="bankroll ${bankroll >= 0 ? 'positive' : 'negative'}">
           <span>Current Bankroll</span>
