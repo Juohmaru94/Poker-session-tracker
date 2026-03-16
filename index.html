@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Poker Session Tracker (Local‑First)</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar glass">
+        <div>
+          <h1>Poker Session Tracker</h1>
+          <p class="muted">Private • Local-first • Built for serious players</p>
+        </div>
+        <div class="top-actions">
+          <button id="seedDemoBtn" class="btn ghost">Seed Demo</button>
+          <button id="backupBtn" class="btn ghost">Backup JSON</button>
+          <label class="btn ghost file-btn">Restore<input id="restoreInput" type="file" accept="application/json"/></label>
+          <button id="exportCsvBtn" class="btn ghost">Export CSV</button>
+          <button id="darkModeBtn" class="btn">Toggle Theme</button>
+        </div>
+      </header>
+
+      <main>
+        <section id="dashboard" class="panel glass">
+          <div class="panel-head">
+            <h2>Dashboard</h2>
+            <p class="muted">Your bankroll and performance at a glance.</p>
+          </div>
+          <div id="kpis" class="kpi-grid"></div>
+          <div class="chart-grid">
+            <article class="chart-card glass"><h3>Profit Over Time</h3><canvas id="profitChart"></canvas></article>
+            <article class="chart-card glass"><h3>Bankroll Over Time</h3><canvas id="bankrollChart"></canvas></article>
+            <article class="chart-card glass"><h3>Profit by Stakes</h3><canvas id="stakesChart"></canvas></article>
+            <article class="chart-card glass"><h3>Activity by Month</h3><canvas id="activityChart"></canvas></article>
+          </div>
+          <div id="insights" class="insights"></div>
+        </section>
+
+        <section id="session-form-panel" class="panel glass">
+          <div class="panel-head">
+            <h2 id="formTitle">Log Session</h2>
+            <p class="muted">Quick to enter now, deep enough for future analysis.</p>
+          </div>
+          <form id="sessionForm" class="form-grid"></form>
+        </section>
+
+        <section id="history" class="panel glass">
+          <div class="panel-head">
+            <h2>Session History</h2>
+            <p class="muted">Search, filter, edit, duplicate, and review trends.</p>
+          </div>
+          <div id="filters" class="filters"></div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th data-sort="date">Date</th>
+                  <th data-sort="location">Location/Site</th>
+                  <th data-sort="mode">Mode</th>
+                  <th data-sort="variant">Variant</th>
+                  <th data-sort="stakes">Stakes</th>
+                  <th data-sort="durationHours">Hours</th>
+                  <th data-sort="net">Net</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="historyRows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="bankroll" class="panel glass">
+          <div class="panel-head">
+            <h2>Bankroll Management</h2>
+            <p class="muted">Track capital, risk, drawdowns, and recoveries.</p>
+          </div>
+          <form id="bankrollForm" class="bankroll-grid"></form>
+          <div id="bankrollStats" class="kpi-grid"></div>
+          <ul id="bankrollLedger" class="ledger"></ul>
+        </section>
+      </main>
+    </div>
+
+    <dialog id="detailDialog">
+      <article class="detail-card">
+        <button id="closeDetail" class="btn danger small">Close</button>
+        <div id="detailBody"></div>
+      </article>
+    </dialog>
+
+    <template id="fieldTemplate">
+      <label class="field">
+        <span></span>
+        <input />
+      </label>
+    </template>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
