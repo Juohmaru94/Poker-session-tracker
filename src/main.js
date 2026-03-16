@@ -6,7 +6,8 @@ import { sortByDateDesc, uid } from './utils/helpers.js';
 const state = {
   sessions: sortByDateDesc(loadSessions()),
   draft: { gameType: 'cash', variant: 'NLH', date: today() },
-  filters: { gameType: 'all', detail: 'all' }
+  filters: { gameType: 'all', detail: 'all' },
+  pendingDeleteId: null
 };
 
 const app = document.querySelector('#app');
@@ -32,8 +33,8 @@ function render() {
       </header>
 
       <section class="panel-grid">
-        ${sessionForm({ draft: state.draft })}
-        ${sessionTable({ sessions: filtered, filters: state.filters, detailOptions })}
+        ${sessionForm({ draft: state.draft, maxDate: today() })}
+        ${sessionTable({ sessions: filtered, filters: state.filters, detailOptions, pendingDeleteId: state.pendingDeleteId })}
       </section>
     </main>
   `;
@@ -48,6 +49,7 @@ function bindEvents() {
 
   form?.addEventListener('submit', onSubmit);
   form?.addEventListener('change', onFormChange);
+  form?.addEventListener('input', onFormInput);
 
   filterType?.addEventListener('change', (event) => {
     state.filters.gameType = event.target.value;
@@ -63,6 +65,7 @@ function bindEvents() {
     button.addEventListener('click', () => {
       const target = state.sessions.find((session) => session.id === button.dataset.id);
       if (!target) return;
+      state.pendingDeleteId = null;
       state.draft = { ...target };
       render();
     });
@@ -70,8 +73,23 @@ function bindEvents() {
 
   document.querySelectorAll('[data-action="delete"]').forEach((button) => {
     button.addEventListener('click', () => {
+      state.pendingDeleteId = button.dataset.id;
+      render();
+    });
+  });
+
+  document.querySelectorAll('[data-action="confirm-delete"]').forEach((button) => {
+    button.addEventListener('click', () => {
       state.sessions = state.sessions.filter((session) => session.id !== button.dataset.id);
+      state.pendingDeleteId = null;
       saveAndRender();
+    });
+  });
+
+  document.querySelectorAll('[data-action="cancel-delete"]').forEach((button) => {
+    button.addEventListener('click', () => {
+      state.pendingDeleteId = null;
+      render();
     });
   });
 }
@@ -84,9 +102,23 @@ function onFormChange(event) {
   }
 }
 
+function onFormInput(event) {
+  if (event.target.name !== 'date') return;
+  event.target.setCustomValidity(event.target.value > today() ? 'Date cannot be in the future.' : '');
+}
+
 function onSubmit(event) {
   event.preventDefault();
   const payload = readForm(event.currentTarget);
+  const dateInput = event.currentTarget.querySelector('[name="date"]');
+
+  if (payload.date > today()) {
+    dateInput?.setCustomValidity('Date cannot be in the future.');
+    dateInput?.reportValidity();
+    return;
+  }
+
+  dateInput?.setCustomValidity('');
 
   if (payload.id) {
     state.sessions = state.sessions.map((session) => (session.id === payload.id ? payload : session));
@@ -96,6 +128,7 @@ function onSubmit(event) {
   }
 
   state.sessions = sortByDateDesc(state.sessions);
+  state.pendingDeleteId = null;
   state.draft = { gameType: payload.gameType, variant: payload.variant || 'NLH', date: today() };
   saveAndRender();
 }

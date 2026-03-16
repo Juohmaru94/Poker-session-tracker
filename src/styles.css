@@ -168,6 +168,14 @@ input:focus, select:focus {
   background: #8d333a;
 }
 
+.btn-small.confirm {
+  background: #2f9b56;
+}
+
+.btn-small.cancel {
+  background: #a43c4a;
+}
+
 .btn:hover,
 .btn-small:hover {
   filter: brightness(1.1);
@@ -183,6 +191,11 @@ input:focus, select:focus {
   box-shadow: 0 10px 22px rgba(31, 13, 45, 0.28);
 }
 
+.btn-small.confirm:hover {
+  background: #39b464;
+}
+
+.btn-small.cancel:hover,
 .btn-small.danger:hover {
   background: #9e4040;
 }
@@ -241,6 +254,14 @@ th {
 .neg { color: var(--negative); font-weight: 700; }
 .empty { text-align: center; color: var(--muted); }
 .actions-cell { white-space: nowrap; }
+.confirm-actions { white-space: nowrap; }
+.delete-row td {
+  background: rgba(255, 138, 61, 0.06);
+}
+.delete-placeholder {
+  color: var(--muted);
+  font-weight: 600;
+}
 
 @media (max-width: 1050px) {
   .panel-grid { grid-template-columns: 1fr; }

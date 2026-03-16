@@ -16,7 +16,7 @@ function showTournamentFields(gameType) {
   return gameType === 'tournament' || gameType === 'sit-go';
 }
 
-export function sessionForm({ draft }) {
+export function sessionForm({ draft, maxDate }) {
   const tournamentMode = showTournamentFields(draft.gameType);
 
   return `
@@ -28,7 +28,7 @@ export function sessionForm({ draft }) {
 
       <div class="grid">
         <label>Date
-          <input type="date" name="date" required value="${draft.date || ''}" />
+          <input type="date" name="date" max="${maxDate}" required value="${draft.date || ''}" />
         </label>
 
         <label>Location

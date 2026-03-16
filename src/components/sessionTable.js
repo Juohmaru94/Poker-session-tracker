@@ -6,7 +6,7 @@ function optionMarkup(options, selectedValue) {
     .join('');
 }
 
-export function sessionTable({ sessions, filters, detailOptions }) {
+export function sessionTable({ sessions, filters, detailOptions, pendingDeleteId }) {
   return `
     <section class="card history-card">
       <div class="history-head">
@@ -35,18 +35,28 @@ export function sessionTable({ sessions, filters, detailOptions }) {
             ${sessions.length === 0 ? `
               <tr><td colspan="7" class="empty">No sessions match your filters yet.</td></tr>
             ` : sessions.map((session) => `
-              <tr>
-                <td>${session.date || '-'}</td>
-                <td>${session.location || '-'}</td>
-                <td>${labelType(session.gameType)}</td>
-                <td>${session.variant || '-'}</td>
-                <td>${detailText(session)}</td>
-                <td class="${sessionProfit(session) >= 0 ? 'pos' : 'neg'}">${euro(sessionProfit(session))}</td>
-                <td class="actions-cell">
-                  <button class="btn-small" data-action="edit" data-id="${session.id}">Edit</button>
-                  <button class="btn-small danger" data-action="delete" data-id="${session.id}">Delete</button>
-                </td>
-              </tr>
+              ${session.id === pendingDeleteId ? `
+                <tr class="delete-row">
+                  <td colspan="6" class="delete-placeholder">Confirm deletion for this session?</td>
+                  <td class="actions-cell confirm-actions">
+                    <button class="btn-small confirm" data-action="confirm-delete" data-id="${session.id}">Confirm</button>
+                    <button class="btn-small cancel" data-action="cancel-delete">Cancel</button>
+                  </td>
+                </tr>
+              ` : `
+                <tr>
+                  <td>${session.date || '-'}</td>
+                  <td>${session.location || '-'}</td>
+                  <td>${labelType(session.gameType)}</td>
+                  <td>${session.variant || '-'}</td>
+                  <td>${detailText(session)}</td>
+                  <td class="${sessionProfit(session) >= 0 ? 'pos' : 'neg'}">${euro(sessionProfit(session))}</td>
+                  <td class="actions-cell">
+                    <button class="btn-small" data-action="edit" data-id="${session.id}">Edit</button>
+                    <button class="btn-small danger" data-action="delete" data-id="${session.id}">Delete</button>
+                  </td>
+                </tr>
+              `}
             `).join('')}
           </tbody>
         </table>
