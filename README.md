@@ -45,3 +45,9 @@ Then open `http://localhost:4173`.
 2. Replace `localStorage` with SQLite (or keep both with sync/migration).
 3. Wrap the UI with Tauri for a lightweight native Windows `.exe`.
 4. Add import/export, backup, and richer bankroll analytics.
+
+## Sharing the app
+
+- Keep the source code in GitHub.
+- Do not commit `node_modules`, `.npm-cache`, or packaged `.exe` files.
+- Build the Windows app locally, then upload the packaged executable as a GitHub Release asset or share it via cloud storage.
